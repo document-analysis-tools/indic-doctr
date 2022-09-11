@@ -4,6 +4,7 @@
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
 import os
+import json
 
 os.environ["USE_TORCH"] = "1"
 
@@ -30,6 +31,7 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
     val_metric.reset()
     # Validation loop
     val_loss, batch_cnt = 0, 0
+    predictions = []
     for images, targets in tqdm(val_loader):
         try:
             if torch.cuda.is_available():
@@ -41,6 +43,11 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
             else:
                 out = model(images, targets, return_preds=True)
             # Compute metric
+            
+            d = {}
+            d['pred'] = out['preds'][0]
+            d['actual'] = targets[0]
+            predictions.append(d)
             if len(out["preds"]):
                 words, _ = zip(*out["preds"])
             else:
@@ -52,7 +59,9 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
         except ValueError:
             print(f"unexpected symbol/s in targets:\n{targets} \n--> skip batch")
             continue
-
+            
+    with open("mydata.json", "w") as final:
+        json.dump(predictions, final)
     val_loss /= batch_cnt
     result = val_metric.summary()
     return val_loss, result["raw"], result["unicase"]

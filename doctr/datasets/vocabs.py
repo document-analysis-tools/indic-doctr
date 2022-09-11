@@ -27,6 +27,7 @@ VOCABS: Dict[str, str] = {
 
 VOCABS['hindi'] = 'ैइख़ऋ०ऑुनणघ७ग़४ऎवऌठथखॉषॠढ़ब६मङऐऒअउकॼेक़॓ॾॱढफ्ओई॔ं५९औसछऴगॊचृॅॄ॰ळदँआहःपभॽ८३ड़॥झ॑ऍऊीऩॻाट।२िूलय़र॒शऽ़ोॢज़डजफ़धएऱौ१यतॲॐञ-'
 VOCABS['sanskrit']='ज़ऋुड़ऍऐक५टय४उः३ॠध९्७ू१वऌौॐॡॢइ६ाै८नृअंथढेखऔघग़०लजोईरञपफँझभषॅॄगतचहसीढ़आशए।म२दठङबिऊडओळछण़ऽ'
+VOCABS['devanagari'] = 'रचख़३ॾऍृेञलॻॉऴषॐॢ१य०ॽएा२ई।ग़७टऐय़॥तोदऽभुनओऒ-ठँ.ौ्८ॼझॠविःक़ी॰छॅॊऩऱ़थजशळङअऋखबफउ५फ़६ऊॲॆज़कढ़मूस॓इऔह॑ैगढॣधआड़९ं४डणपॄघऑ'
 VOCABS["latin"] = VOCABS["digits"] + VOCABS["ascii_letters"] + VOCABS["punctuation"]
 VOCABS["english"] = VOCABS["latin"] + "°" + VOCABS["currency"]
 VOCABS["legacy_french"] = VOCABS["latin"] + "°" + "àâéèêëîïôùûçÀÂÉÈËÎÏÔÙÛÇ" + VOCABS["currency"]
