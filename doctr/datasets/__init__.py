@@ -5,7 +5,7 @@ from .cord import *
 from .detection import *
 from .doc_artefacts import *
 from .funsd import *
-from .devanagari import *
+from .indicData import *
 from .ic03 import *
 from .ic13 import *
 from .iiit5k import *

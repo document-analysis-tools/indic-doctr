@@ -13,6 +13,8 @@ import logging
 import multiprocessing as mp
 import time
 from pathlib import Path
+from tqdm import tqdm
+import json
 
 import numpy as np
 import torch
@@ -108,7 +110,7 @@ def fit_one_epoch(model, train_loader, batch_transforms, optimizer, scheduler, m
 
     model.train()
     # Iterate over the batches of the dataset
-    for images, targets in progress_bar(train_loader, parent=mb):
+    for images, targets, names in progress_bar(train_loader, parent=mb):
 
         if torch.cuda.is_available():
             images = images.cuda()
@@ -165,6 +167,46 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
         val_loss += out["loss"].item()
         batch_cnt += 1
 
+    val_loss /= batch_cnt
+    result = val_metric.summary()
+    return val_loss, result["raw"], result["unicase"]
+
+
+@torch.no_grad()
+def evaluateTest(model, val_loader, batch_transforms, val_metric, amp=False):
+    # Model in eval mode
+    model.eval()
+    # Reset val metric
+    val_metric.reset()
+    # Validation loop
+    val_loss, batch_cnt = 0, 0
+    predictions = []
+    for images, targets in tqdm(val_loader):
+        if torch.cuda.is_available():
+            images = images.cuda()
+        images = batch_transforms(images)
+        if amp:
+            with torch.cuda.amp.autocast():
+                out = model(images, targets, return_preds=True)
+        else:
+            out = model(images, targets, return_preds=True)
+            
+        d = {}
+        d['pred'] = out['preds'][0]
+        d['actual'] = targets[0]
+        predictions.append(d)
+        # Compute metric
+        if len(out["preds"]):
+            words, _ = zip(*out["preds"])
+        else:
+            words = []
+        val_metric.update(targets, words)
+
+        val_loss += out["loss"].item()
+        batch_cnt += 1
+
+    with open("results.json", "w") as final:
+        json.dump(predictions, final)
     val_loss /= batch_cnt
     result = val_metric.summary()
     return val_loss, result["raw"], result["unicase"]
@@ -256,7 +298,7 @@ def main(args):
 
     if args.test_only:
         print("Running evaluation")
-        val_loss, exact_match, partial_match = evaluate(model, val_loader, batch_transforms, val_metric, amp=args.amp)
+        val_loss, exact_match, partial_match = evaluateTest(model, val_loader, batch_transforms, val_metric, amp=args.amp)
         print(f"Validation loss: {val_loss:.6} (Exact: {exact_match:.2%} | Partial: {partial_match:.2%})")
         return
 
@@ -346,7 +388,7 @@ def main(args):
 
     # Training monitoring
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    exp_name = f"{args.arch}_{current_time}" if args.name is None else args.name
+    exp_name = f"{args.arch}_{current_time}_{args.vocab}" if args.name is None else args.name
 
     # W&B
     if args.wb:

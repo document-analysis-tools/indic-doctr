@@ -14,13 +14,13 @@ from tqdm import tqdm
 from .datasets import VisionDataset
 from .utils import convert_target_to_relative, crop_bboxes_from_image
 
-__all__ = ["DEVANAGARI"]
+__all__ = ["IndicData"]
 
 
-class DEVANAGARI(VisionDataset):
+class IndicData(VisionDataset):
     """
-    >>> from doctr.datasets import DEVANAGARI
-    >>> train_set = DEVANAGARI(train=True, download=True)
+    >>> from doctr.datasets import IndicData
+    >>> train_set = IndicData(train=True, download=True)
     >>> img, target = train_set[0]
 
     Args:
@@ -32,13 +32,14 @@ class DEVANAGARI(VisionDataset):
 
     URL = "https://guillaumejaume.github.io/FUNSD/dataset.zip"
     SHA256 = "c31735649e4f441bcbb4fd0f379574f7520b42286e80b01d80b445649d54761f"
-    FILE_NAME = "devanagari.zip"
+    FILE_NAME = "indic_testsets.zip"
 
     def __init__(
         self,
         train: bool = True,
         use_polygons: bool = False,
         recognition_task: bool = False,
+        language: str = 'devanagari',
         **kwargs: Any,
     ) -> None:
 
@@ -54,7 +55,9 @@ class DEVANAGARI(VisionDataset):
         np_dtype = np.float32
 
         # Use the subset
-        subfolder = os.path.join(self.root, "dataset", "val")
+        if(language=='hindi'):
+            language = 'devanagari'
+        subfolder = os.path.join(self.root, language)
         
         text_data= json.load(open(os.path.join(subfolder,'labels.json')))
         box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
@@ -62,14 +65,15 @@ class DEVANAGARI(VisionDataset):
         # # List images
         tmp_root = os.path.join(self.root, subfolder, "images")
         self.data: List[Tuple[Union[str, np.ndarray], Union[str, Dict[str, Any]]]] = []
-        for img_path in tqdm(iterable=os.listdir(tmp_root), desc="Unpacking DEVANAGARI", total=len(os.listdir(tmp_root))):
-   
+        for img_path in tqdm(iterable=os.listdir(tmp_root), desc="Unpacking DEVANAGARI", total=len(os.listdir(tmp_root))):           
+            
             # File existence check
             if not os.path.exists(os.path.join(tmp_root, img_path)):
                 raise FileNotFoundError(f"unable to locate {os.path.join(tmp_root, img_path)}")
 
             text_targets = [text_data[img_path]]
             box_targets = [box_data[img_path]]
+            image_names = [img_path]
 
             if use_polygons:
                 # xmin, ymin, xmax, ymax -> (x, y) coordinates of top left, top right, bottom right, bottom left corners
@@ -87,15 +91,15 @@ class DEVANAGARI(VisionDataset):
                 crops = crop_bboxes_from_image(
                     img_path=os.path.join(tmp_root, img_path), geoms=np.asarray(box_targets, dtype=np_dtype)
                 )
-                for crop, label in zip(crops, list(text_targets)):
+                for crop, label, name in zip(crops, list(text_targets), list(image_names)):
                     # filter labels with unknown characters
                     if not any(char in label for char in ["☑", "☐", "\uf703", "\uf702"]):
-                        self.data.append((crop, label))
+                        self.data.append((crop, label, name))
             else:
                 self.data.append(
                     (
                         img_path,
-                        dict(boxes=np.asarray(box_targets, dtype=np_dtype), labels=list(text_targets)),
+                        dict(boxes=np.asarray(box_targets, dtype=np_dtype), labels=list(text_targets), images=list(image_names)),
                     )
                 )
 

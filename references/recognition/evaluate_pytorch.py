@@ -32,7 +32,7 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
     # Validation loop
     val_loss, batch_cnt = 0, 0
     predictions = []
-    for images, targets in tqdm(val_loader):
+    for images, targets, names in tqdm(val_loader):
         try:
             if torch.cuda.is_available():
                 images = images.cuda()
@@ -47,6 +47,7 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
             d = {}
             d['pred'] = out['preds'][0]
             d['actual'] = targets[0]
+            d['name'] = names[0]
             predictions.append(d)
             if len(out["preds"]):
                 words, _ = zip(*out["preds"])
@@ -94,18 +95,19 @@ def main(args):
         train=True,
         download=True,
         recognition_task=True,
+        language=args.vocab,
         use_polygons=args.regular,
         img_transforms=T.Resize((args.input_size, 4 * args.input_size), preserve_aspect_ratio=True),
     )
 
-    _ds = datasets.__dict__[args.dataset](
-        train=False,
-        download=True,
-        recognition_task=True,
-        use_polygons=args.regular,
-        img_transforms=T.Resize((args.input_size, 4 * args.input_size), preserve_aspect_ratio=True),
-    )
-    ds.data.extend([(np_img, target) for np_img, target in _ds.data])
+#     _ds = datasets.__dict__[args.dataset](
+#         train=False,
+#         download=True,
+#         recognition_task=True,
+#         use_polygons=args.regular,
+#         img_transforms=T.Resize((args.input_size, 4 * args.input_size), preserve_aspect_ratio=True),
+#     )
+#     ds.data.extend([(np_img, target, name) for np_img, target, name in _ds.data])
 
     test_loader = DataLoader(
         ds,

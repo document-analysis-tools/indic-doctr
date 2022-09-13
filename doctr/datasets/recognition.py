@@ -43,7 +43,7 @@ class RecognitionDataset(AbstractDataset):
             if not os.path.exists(os.path.join(self.root, img_name)):
                 raise FileNotFoundError(f"unable to locate {os.path.join(self.root, img_name)}")
 
-            self.data.append((img_name, label))
+            self.data.append((img_name, label, ""))
 
     def merge_dataset(self, ds: AbstractDataset) -> None:
         # Update data with new root for self
@@ -52,4 +52,4 @@ class RecognitionDataset(AbstractDataset):
         self.root = Path("/")
         # Merge with ds data
         for img_path, label in ds.data:
-            self.data.append((str(Path(ds.root).joinpath(img_path)), label))
+            self.data.append((str(Path(ds.root).joinpath(img_path)), label, ""))

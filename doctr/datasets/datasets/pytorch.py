@@ -19,7 +19,7 @@ __all__ = ["AbstractDataset", "VisionDataset"]
 
 class AbstractDataset(_AbstractDataset):
     def _read_sample(self, index: int) -> Tuple[torch.Tensor, Any]:
-        img_name, target = self.data[index]
+        img_name, target, name = self.data[index]
 
         # Check target
         if isinstance(target, dict):
@@ -37,15 +37,15 @@ class AbstractDataset(_AbstractDataset):
             else read_img_as_tensor(os.path.join(self.root, img_name), dtype=torch.float32)
         )
 
-        return img, deepcopy(target)
+        return img, deepcopy(target), name
 
     @staticmethod
     def collate_fn(samples: List[Tuple[torch.Tensor, Any]]) -> Tuple[torch.Tensor, List[Any]]:
 
-        images, targets = zip(*samples)
+        images, targets, names = zip(*samples)
         images = torch.stack(images, dim=0)
 
-        return images, list(targets)
+        return images, list(targets), list(names)
 
 
 class VisionDataset(AbstractDataset, _VisionDataset):

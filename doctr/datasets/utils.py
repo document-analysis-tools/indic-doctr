@@ -75,7 +75,7 @@ def encode_string(
     try:
         return list(map(vocab.index, input_string))
     except ValueError:
-        raise ValueError("some characters cannot be found in 'vocab'")
+        raise ValueError("some characters cannot be found in 'vocab' : "+input_string)
 
 
 def decode_sequence(
