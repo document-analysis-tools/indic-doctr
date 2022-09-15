@@ -148,7 +148,7 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
     val_metric.reset()
     # Validation loop
     val_loss, batch_cnt = 0, 0
-    for images, targets in val_loader:
+    for images, targets, names in val_loader:
         if torch.cuda.is_available():
             images = images.cuda()
         images = batch_transforms(images)
@@ -388,7 +388,7 @@ def main(args):
 
     # Training monitoring
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    exp_name = f"{args.arch}_{current_time}_{args.vocab}" if args.name is None else args.name
+    exp_name = f"{args.arch}_{args.vocab}" if args.name is None else args.name
 
     # W&B
     if args.wb:
@@ -424,7 +424,7 @@ def main(args):
         val_loss, exact_match, partial_match = evaluate(model, val_loader, batch_transforms, val_metric, amp=args.amp)
         if val_loss < min_loss:
             print(f"Validation loss decreased {min_loss:.6} --> {val_loss:.6}: saving state...")
-            torch.save(model.state_dict(), f"./{exp_name}.pt")
+            torch.save(model.state_dict(), f"./models/{exp_name}.pt")
             min_loss = val_loss
         mb.write(
             f"Epoch {epoch + 1}/{args.epochs} - Validation loss: {val_loss:.6} "

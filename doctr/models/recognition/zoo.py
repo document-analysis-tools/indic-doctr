@@ -14,7 +14,7 @@ from .predictor import RecognitionPredictor
 __all__ = ["recognition_predictor"]
 
 
-ARCHS: List[str] = ["crnn_vgg16_bn", "crnn_vgg16_bn_hindi", "crnn_mobilenet_v3_small", "crnn_mobilenet_v3_large", "sar_resnet31", "master"]
+ARCHS: List[str] = ["crnn_vgg16_bn", "crnn_vgg16_bn_hindi", "crnn_mobilenet_v3_small", "crnn_mobilenet_v3_large", "sar_resnet31", "master", "crnn_vgg16_bn_bengali", "crnn_vgg16_bn_gujarati", "crnn_vgg16_bn_gurumukhi", "crnn_vgg16_bn_kannada", "crnn_vgg16_bn_malayalam", "crnn_vgg16_bn_odia", "crnn_vgg16_bn_tamil", "crnn_vgg16_bn_telugu", "crnn_vgg16_bn_urdu",]
 
 
 def _predictor(arch: Any, pretrained: bool, **kwargs: Any) -> RecognitionPredictor:

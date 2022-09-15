@@ -114,6 +114,6 @@ class _VisionDataset(_AbstractDataset):
             archive_path = Path(archive_path)
             dataset_path = archive_path.parent.joinpath(archive_path.stem)
             if not dataset_path.is_dir() or overwrite:
-                shutil.unpack_archive(archive_path, dataset_path)
+                shutil.unpack_archive(archive_path, dataset_path, "zip")
 
         super().__init__(dataset_path if extract_archive else archive_path, **kwargs)

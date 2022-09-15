@@ -10,6 +10,7 @@ os.environ["USE_TORCH"] = "1"
 
 import multiprocessing as mp
 import time
+import pandas as pd
 
 import torch
 from torch.utils.data import DataLoader, SequentialSampler
@@ -22,6 +23,20 @@ from doctr.datasets import VOCABS
 from doctr.models import recognition
 from doctr.utils.metrics import TextMatch
 
+
+def get_results(predictions, language):
+    df = pd.DataFrame(predictions)
+    df[['pred','score']] =  pd.DataFrame(df.pred.tolist(), index= df.index)
+    df = df.drop_duplicates()
+    df['id']= df['name'].str.split("_")
+    df[['temp','id']] =  pd.DataFrame(df.id.tolist(), index= df.index)
+    df['id'] = df['id'].apply(lambda x: str(x).rstrip('.jpg'))
+    df['id'] = df['id'].astype(int)
+    df['name'] = df['name'].str.replace('_','/')
+    df = df.sort_values('id')
+    df = df[['name','pred']]
+    filename = './data/results/'+language+'_results.txt'
+    df.to_csv(filename, sep='\t', index=False)
 
 @torch.no_grad()
 def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
@@ -61,11 +76,9 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
             print(f"unexpected symbol/s in targets:\n{targets} \n--> skip batch")
             continue
             
-    with open("mydata.json", "w") as final:
-        json.dump(predictions, final)
     val_loss /= batch_cnt
     result = val_metric.summary()
-    return val_loss, result["raw"], result["unicase"]
+    return val_loss, result["raw"], result["unicase"], predictions
 
 
 def main(args):
@@ -96,6 +109,7 @@ def main(args):
         download=True,
         recognition_task=True,
         language=args.vocab,
+        inp_path=args.input_path,
         use_polygons=args.regular,
         img_transforms=T.Resize((args.input_size, 4 * args.input_size), preserve_aspect_ratio=True),
     )
@@ -142,8 +156,9 @@ def main(args):
         model = model.cuda()
 
     print("Running evaluation")
-    val_loss, exact_match, partial_match = evaluate(model, test_loader, batch_transforms, val_metric, amp=args.amp)
-    print(f"Validation loss: {val_loss:.6} (Exact: {exact_match:.2%} | Partial: {partial_match:.2%})")
+    val_loss, exact_match, partial_match, predictions = evaluate(model, test_loader, batch_transforms, val_metric, amp=args.amp)
+#     print(f"Validation loss: {val_loss:.6} (Exact: {exact_match:.2%} | Partial: {partial_match:.2%})")
+    get_results(predictions, args.vocab)
 
 
 def parse_args():
@@ -155,11 +170,12 @@ def parse_args():
     )
 
     parser.add_argument("arch", type=str, help="text-recognition model to evaluate")
-    parser.add_argument("--vocab", type=str, default="french", help="Vocab to be used for evaluation")
-    parser.add_argument("--dataset", type=str, default="FUNSD", help="Dataset to evaluate on")
+    parser.add_argument("--vocab", type=str, default="hindi", help="Vocab to be used for evaluation")
+    parser.add_argument("--dataset", type=str, default="IndicData", help="Dataset to evaluate on")
     parser.add_argument("--device", default=None, type=int, help="device")
     parser.add_argument("-b", "--batch_size", type=int, default=1, help="batch size for evaluation")
     parser.add_argument("--input_size", type=int, default=32, help="input size H for the model, W = 4*H")
+    parser.add_argument("--input_path", type=str, default="./data/processed/", help="Path of the test dataset")
     parser.add_argument("-j", "--workers", type=int, default=None, help="number of workers used for dataloading")
     parser.add_argument(
         "--only_regular", dest="regular", action="store_true", help="test set contains only regular text"

@@ -40,6 +40,7 @@ class IndicData(VisionDataset):
         use_polygons: bool = False,
         recognition_task: bool = False,
         language: str = 'devanagari',
+        inp_path: str = './data/processed/',
         **kwargs: Any,
     ) -> None:
 
@@ -57,15 +58,17 @@ class IndicData(VisionDataset):
         # Use the subset
         if(language=='hindi'):
             language = 'devanagari'
-        subfolder = os.path.join(self.root, language)
-        
+        subfolder = os.path.join(inp_path, language)
+        subfolder = os.path.join(subfolder,'test')
+
         text_data= json.load(open(os.path.join(subfolder,'labels.json')))
         box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
 
         # # List images
-        tmp_root = os.path.join(self.root, subfolder, "images")
+        tmp_root = os.path.join(subfolder, "images")
         self.data: List[Tuple[Union[str, np.ndarray], Union[str, Dict[str, Any]]]] = []
-        for img_path in tqdm(iterable=os.listdir(tmp_root), desc="Unpacking DEVANAGARI", total=len(os.listdir(tmp_root))):           
+        message = "unpacking "+ language + " testset"
+        for img_path in tqdm(iterable=os.listdir(tmp_root), desc=message, total=len(os.listdir(tmp_root))):           
             
             # File existence check
             if not os.path.exists(os.path.join(tmp_root, img_path)):
