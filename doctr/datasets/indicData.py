@@ -41,6 +41,7 @@ class IndicData(VisionDataset):
         recognition_task: bool = False,
         language: str = 'devanagari',
         inp_path: str = './data/processed/',
+        sets: str = 'test',
         **kwargs: Any,
     ) -> None:
 
@@ -59,7 +60,7 @@ class IndicData(VisionDataset):
         if(language=='hindi'):
             language = 'devanagari'
         subfolder = os.path.join(inp_path, language)
-        subfolder = os.path.join(subfolder,'test')
+        subfolder = os.path.join(subfolder,sets)
 
         text_data= json.load(open(os.path.join(subfolder,'labels.json')))
         box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
@@ -105,7 +106,6 @@ class IndicData(VisionDataset):
                         dict(boxes=np.asarray(box_targets, dtype=np_dtype), labels=list(text_targets), images=list(image_names)),
                     )
                 )
-
         self.root = tmp_root
 
     def extra_repr(self) -> str:

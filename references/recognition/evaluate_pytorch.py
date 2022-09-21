@@ -11,6 +11,7 @@ os.environ["USE_TORCH"] = "1"
 import multiprocessing as mp
 import time
 import pandas as pd
+import fastwer
 
 import torch
 from torch.utils.data import DataLoader, SequentialSampler
@@ -23,8 +24,14 @@ from doctr.datasets import VOCABS
 from doctr.models import recognition
 from doctr.utils.metrics import TextMatch
 
+def get_wer(x,y):    
+    return fastwer.score(x, y)
+    
+def get_cer(x,y):
+    return fastwer.score(x, y, char_level=True)
 
-def get_results(predictions, language):
+
+def get_test_results(predictions, language):
     df = pd.DataFrame(predictions)
     df[['pred','score']] =  pd.DataFrame(df.pred.tolist(), index= df.index)
     df = df.drop_duplicates()
@@ -36,6 +43,37 @@ def get_results(predictions, language):
     df = df.sort_values('id')
     df = df[['name','pred']]
     filename = './data/results/'+language+'_results.txt'
+    df.to_csv(filename, sep='\t', index=False)
+    
+def get_val_results(predictions, language):
+    df = pd.DataFrame(predictions)
+    df[['pred','score']] =  pd.DataFrame(df.pred.tolist(), index= df.index)
+    df = df.drop_duplicates()
+    df['id']= df['name'].str.split("_")
+    if(language=='hindi' or language=='telugu' or language=='devanagari'):
+        print("running "+language)
+    else: 
+        df[['temp','id']] =  pd.DataFrame(df.id.tolist(), index= df.index)
+        df['id'] = df['id'].apply(lambda x: str(x).rstrip('.jpg'))
+        df['id'] = df['id'].astype(int)
+        df['name'] = df['name'].str.replace('_','/')
+        df = df.sort_values('id')
+    df = df[['name','pred', 'actual']]
+    df['WER'] = df.apply(lambda x: get_wer([x['pred']], [x['actual']]), axis=1)
+    df['CER'] = df.apply(lambda x: get_cer([x['pred']], [x['actual']]), axis=1)
+    
+    pred_list =  list(df["pred"])
+    actual_list = list(df['actual'])
+
+    WER = get_wer(pred_list, actual_list)
+    CER = get_cer(pred_list, actual_list)
+    print("\n Evaluation Results for "+language+" validation set: ")
+    print("\tWord Error Rate = ",WER)
+    print("\tChar Error Rate = ",CER)
+
+    print("\tWord Recognition Rate = ", (100 - WER))
+    print("\tChar Recognition Rate = ", (100 - CER))
+    filename = './data/results/'+language+'_val_results.txt'
     df.to_csv(filename, sep='\t', index=False)
 
 @torch.no_grad()
@@ -110,6 +148,7 @@ def main(args):
         recognition_task=True,
         language=args.vocab,
         inp_path=args.input_path,
+        sets=args.sets,
         use_polygons=args.regular,
         img_transforms=T.Resize((args.input_size, 4 * args.input_size), preserve_aspect_ratio=True),
     )
@@ -158,7 +197,11 @@ def main(args):
     print("Running evaluation")
     val_loss, exact_match, partial_match, predictions = evaluate(model, test_loader, batch_transforms, val_metric, amp=args.amp)
 #     print(f"Validation loss: {val_loss:.6} (Exact: {exact_match:.2%} | Partial: {partial_match:.2%})")
-    get_results(predictions, args.vocab)
+    if(args.sets != 'test'):
+        get_val_results(predictions, args.vocab)
+    else:
+        get_test_results(predictions, args.vocab)
+        
 
 
 def parse_args():
@@ -177,6 +220,7 @@ def parse_args():
     parser.add_argument("--input_size", type=int, default=32, help="input size H for the model, W = 4*H")
     parser.add_argument("--input_path", type=str, default="./data/processed/", help="Path of the test dataset")
     parser.add_argument("-j", "--workers", type=int, default=None, help="number of workers used for dataloading")
+    parser.add_argument("--sets", type=str, default='test', help='Evaluating on Test or Validation set')
     parser.add_argument(
         "--only_regular", dest="regular", action="store_true", help="test set contains only regular text"
     )
