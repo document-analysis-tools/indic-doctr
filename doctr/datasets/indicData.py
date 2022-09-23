@@ -68,9 +68,11 @@ class IndicData(VisionDataset):
         if(sets!='test'):
             text_data= json.load(open(os.path.join(subfolder,'labels.json')))
             box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
+            tmp_root = os.path.join(subfolder, "images")
+        else:
+            tmp_root = subfolder
 
         # # List images
-        tmp_root = os.path.join(subfolder, "images")
         self.data: List[Tuple[Union[str, np.ndarray], Union[str, Dict[str, Any]]]] = []
         message = "unpacking "+ language + " testset"
         for img_path in tqdm(iterable=os.listdir(tmp_root), desc=message, total=len(os.listdir(tmp_root))):           
