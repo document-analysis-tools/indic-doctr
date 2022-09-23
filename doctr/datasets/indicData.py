@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
+from PIL import Image
 
 import numpy as np
 from tqdm import tqdm
@@ -59,11 +60,14 @@ class IndicData(VisionDataset):
         # Use the subset
         if(language=='hindi'):
             language = 'devanagari'
-        subfolder = os.path.join(inp_path, language)
-        subfolder = os.path.join(subfolder,sets)
+        # subfolder = os.path.join(inp_path, language)
+        # subfolder = os.path.join(subfolder,sets)
+        subfolder = inp_path
 
-        text_data= json.load(open(os.path.join(subfolder,'labels.json')))
-        box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
+
+        if(sets!='test'):
+            text_data= json.load(open(os.path.join(subfolder,'labels.json')))
+            box_data= json.load(open(os.path.join(subfolder,'dimensions.json')))
 
         # # List images
         tmp_root = os.path.join(subfolder, "images")
@@ -75,9 +79,17 @@ class IndicData(VisionDataset):
             if not os.path.exists(os.path.join(tmp_root, img_path)):
                 raise FileNotFoundError(f"unable to locate {os.path.join(tmp_root, img_path)}")
 
-            text_targets = [text_data[img_path]]
-            box_targets = [box_data[img_path]]
-            image_names = [img_path]
+            if(sets!='test'):
+                text_targets = [text_data[img_path]]
+                box_targets = [box_data[img_path]]
+                image_names = [img_path]
+            else:
+                text_targets = [""]
+                im = Image.open(os.path.join(tmp_root, img_path))
+                width, height = im.size
+                box = [0 , 0, width, height]
+                box_targets = [box]
+                image_names = [img_path]
 
             if use_polygons:
                 # xmin, ymin, xmax, ymax -> (x, y) coordinates of top left, top right, bottom right, bottom left corners
