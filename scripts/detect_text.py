@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -14,7 +14,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 from doctr.file_utils import is_tf_available
 from doctr.io import DocumentFile
-from doctr.models import ocr_predictor
+from doctr.models import detection, ocr_predictor
 
 # Enable GPU growth if using TF
 if is_tf_available():
@@ -29,7 +29,6 @@ OTHER_EXTENSIONS = [".pdf"]
 
 
 def _process_file(model, file_path: Path, out_format: str) -> None:
-
     if out_format not in ["txt", "json", "xml"]:
         raise ValueError(f"Unsupported output format: {out_format}")
 
@@ -60,7 +59,11 @@ def _process_file(model, file_path: Path, out_format: str) -> None:
 
 
 def main(args):
-    model = ocr_predictor(args.detection, args.recognition, pretrained=True)
+    detection_model = detection.__dict__[args.detection](
+        pretrained=True,
+        bin_thresh=args.bin_thresh,
+    )
+    model = ocr_predictor(detection_model, args.recognition, pretrained=True)
     path = Path(args.path)
 
     os.makedirs(name="output", exist_ok=True)
@@ -82,6 +85,7 @@ def parse_args():
     )
     parser.add_argument("path", type=str, help="Path to process: PDF, image, directory")
     parser.add_argument("--detection", type=str, default="db_resnet50", help="Text detection model to use for analysis")
+    parser.add_argument("--bin-thresh", type=float, default=0.3, help="Binarization threshold for the detection model.")
     parser.add_argument(
         "--recognition", type=str, default="crnn_vgg16_bn", help="Text recognition model to use for analysis"
     )

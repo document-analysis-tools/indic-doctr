@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -31,7 +31,6 @@ class CropOrientationPredictor(NestedObject):
         pre_processor: PreProcessor,
         model: keras.Model,
     ) -> None:
-
         self.pre_processor = pre_processor
         self.model = model
 
@@ -39,7 +38,6 @@ class CropOrientationPredictor(NestedObject):
         self,
         crops: List[Union[np.ndarray, tf.Tensor]],
     ) -> List[int]:
-
         # Dimension check
         if any(crop.ndim != 3 for crop in crops):
             raise ValueError("incorrect input shape: all crops are expected to be multi-channel 2D images.")

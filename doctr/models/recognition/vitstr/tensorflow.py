@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -63,7 +63,6 @@ class ViTSTR(_ViTSTR, Model):
         exportable: bool = False,
         cfg: Optional[Dict[str, Any]] = None,
     ) -> None:
-
         super().__init__()
         self.vocab = vocab
         self.exportable = exportable
@@ -118,7 +117,6 @@ class ViTSTR(_ViTSTR, Model):
         return_preds: bool = False,
         **kwargs: Any,
     ) -> Dict[str, Any]:
-
         features = self.feat_extractor(x, **kwargs)  # (batch_size, patches_seqlen, d_model)
 
         if target is not None:
@@ -190,7 +188,6 @@ def _vitstr(
     input_shape: Optional[Tuple[int, int, int]] = None,
     **kwargs: Any,
 ) -> ViTSTR:
-
     pretrained_backbone = pretrained_backbone and not pretrained
 
     # Patch the config

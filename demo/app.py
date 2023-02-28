@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -75,7 +75,6 @@ def main(det_archs, reco_archs):
     st.sidebar.write("\n")
 
     if st.sidebar.button("Analyze page"):
-
         if uploaded_file is None:
             st.sidebar.write("Please upload a document")
 
@@ -84,7 +83,6 @@ def main(det_archs, reco_archs):
                 predictor = load_predictor(det_arch, reco_arch, forward_device)
 
             with st.spinner("Analyzing..."):
-
                 # Forward the image to the model
                 seg_map = forward_image(predictor, page, forward_device)
                 seg_map = np.squeeze(seg_map)

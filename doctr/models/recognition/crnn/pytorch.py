@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -269,7 +269,6 @@ class CRNN(RecognitionModel, nn.Module):
         return_model_output: bool = False,
         return_preds: bool = False,
     ) -> Dict[str, Any]:
-
         if self.training and target is None:
             raise ValueError("Need to provide labels during training")
 
@@ -307,7 +306,6 @@ def _crnn(
     ignore_keys: Optional[List[str]] = None,
     **kwargs: Any,
 ) -> CRNN:
-
     pretrained_backbone = pretrained_backbone and not pretrained
 
     # Feature extractor

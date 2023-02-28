@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -108,14 +108,12 @@ def record_lr(
 
 
 def fit_one_epoch(model, train_loader, batch_transforms, optimizer, scheduler, mb, amp=False):
-
     if amp:
         scaler = torch.cuda.amp.GradScaler()
 
     model.train()
     # Iterate over the batches of the dataset
     for images, targets in progress_bar(train_loader, parent=mb):
-
         if torch.cuda.is_available():
             images = images.cuda()
             targets = targets.cuda()
@@ -174,7 +172,6 @@ def evaluate(model, val_loader, batch_transforms, amp=False):
 
 
 def main(args):
-
     print(args)
 
     if args.push_to_hub:
@@ -309,7 +306,6 @@ def main(args):
 
     # W&B
     if args.wb:
-
         run = wandb.init(
             name=exp_name,
             project="character-classification",

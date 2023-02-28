@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -18,7 +18,6 @@ class PatchEmbedding(layers.Layer, NestedObject):
     """Compute 2D patch embeddings with cls token and positional encoding"""
 
     def __init__(self, input_shape: Tuple[int, int, int], embed_dim: int) -> None:
-
         super().__init__()
         height, width, _ = input_shape
         # calculate patch size

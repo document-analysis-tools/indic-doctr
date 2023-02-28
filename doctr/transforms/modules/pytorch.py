@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -38,7 +38,6 @@ class Resize(T.Resize):
         img: torch.Tensor,
         target: Optional[np.ndarray] = None,
     ) -> Union[torch.Tensor, Tuple[torch.Tensor, np.ndarray]]:
-
         if isinstance(self.size, int):
             target_ratio = img.shape[-2] / img.shape[-1]
         else:

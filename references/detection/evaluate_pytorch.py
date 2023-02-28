@@ -1,9 +1,11 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
 import os
+
+from doctr.file_utils import CLASS_NAME
 
 os.environ["USE_TORCH"] = "1"
 
@@ -36,7 +38,7 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
         if torch.cuda.is_available():
             images = images.cuda()
         images = batch_transforms(images)
-        targets = [t["boxes"] for t in targets]
+        targets = [{CLASS_NAME: t["boxes"]} for t in targets]
         if amp:
             with torch.cuda.amp.autocast():
                 out = model(images, targets, return_preds=True)
@@ -44,9 +46,10 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
             out = model(images, targets, return_preds=True)
         # Compute metric
         loc_preds = out["preds"]
-        for boxes_gt, boxes_pred in zip(targets, loc_preds):
-            # Remove scores
-            val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :-1])
+        for target, loc_pred in zip(targets, loc_preds):
+            for boxes_gt, boxes_pred in zip(target.values(), loc_pred.values()):
+                # Remove scores
+                val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :-1])
 
         val_loss += out["loss"].item()
         batch_cnt += 1
@@ -57,7 +60,6 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
 
 
 def main(args):
-
     print(args)
 
     if not isinstance(args.workers, int):

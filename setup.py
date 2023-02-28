@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -9,11 +9,10 @@ from pathlib import Path
 from setuptools import setup
 
 PKG_NAME = "python-doctr"
-VERSION = os.getenv("BUILD_VERSION", "0.6.1a0")
+VERSION = os.getenv("BUILD_VERSION", "0.7.1a0")
 
 
 if __name__ == "__main__":
-
     print(f"Building wheel {PKG_NAME}-{VERSION}")
 
     # Dynamically set the __version__ attribute

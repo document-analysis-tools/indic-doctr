@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -161,7 +161,6 @@ class EncoderBlock(layers.Layer, NestedObject):
         ]
 
     def call(self, x: tf.Tensor, mask: Optional[tf.Tensor] = None, **kwargs: Any) -> tf.Tensor:
-
         output = x
 
         for i in range(self.num_layers):
@@ -190,7 +189,6 @@ class Decoder(layers.Layer, NestedObject):
         dff: int = 2048,  # hidden dimension of the feedforward network
         maximum_position_encoding: int = 50,
     ) -> None:
-
         super(Decoder, self).__init__()
         self.num_layers = num_layers
         self.d_model = d_model
@@ -216,7 +214,6 @@ class Decoder(layers.Layer, NestedObject):
         target_mask: Optional[tf.Tensor] = None,
         **kwargs: Any,
     ) -> tf.Tensor:
-
         tgt = self.embed(tgt, **kwargs) * math.sqrt(self.d_model)
         pos_enc_tgt = self.positional_encoding(tgt, **kwargs)
         output = pos_enc_tgt

@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -102,14 +102,12 @@ def record_lr(
 
 
 def fit_one_epoch(model, train_loader, batch_transforms, optimizer, scheduler, mb, amp=False):
-
     if amp:
         scaler = torch.cuda.amp.GradScaler()
 
     model.train()
     # Iterate over the batches of the dataset
     for images, targets in progress_bar(train_loader, parent=mb):
-
         if torch.cuda.is_available():
             images = images.cuda()
         images = batch_transforms(images)
@@ -155,11 +153,12 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
             out = model(images, targets, return_preds=True)
         # Compute metric
         loc_preds = out["preds"]
-        for boxes_gt, boxes_pred in zip(targets, loc_preds):
-            if args.rotation and args.eval_straight:
-                # Convert pred to boxes [xmin, ymin, xmax, ymax]  N, 4, 2 --> N, 4
-                boxes_pred = np.concatenate((boxes_pred.min(axis=1), boxes_pred.max(axis=1)), axis=-1)
-            val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :4])
+        for target, loc_pred in zip(targets, loc_preds):
+            for boxes_gt, boxes_pred in zip(target.values(), loc_pred.values()):
+                if args.rotation and args.eval_straight:
+                    # Convert pred to boxes [xmin, ymin, xmax, ymax]  N, 4, 2 --> N, 4
+                    boxes_pred = np.concatenate((boxes_pred.min(axis=1), boxes_pred.max(axis=1)), axis=-1)
+                val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :4])
 
         val_loss += out["loss"].item()
         batch_cnt += 1
@@ -170,7 +169,6 @@ def evaluate(model, val_loader, batch_transforms, val_metric, amp=False):
 
 
 def main(args):
-
     print(args)
 
     if args.push_to_hub:
@@ -220,7 +218,11 @@ def main(args):
     batch_transforms = Normalize(mean=(0.798, 0.785, 0.772), std=(0.264, 0.2749, 0.287))
 
     # Load doctr model
-    model = detection.__dict__[args.arch](pretrained=args.pretrained, assume_straight_pages=not args.rotation)
+    model = detection.__dict__[args.arch](
+        pretrained=args.pretrained,
+        assume_straight_pages=not args.rotation,
+        class_names=val_set.class_names,
+    )
 
     # Resume weights
     if isinstance(args.resume, str):
@@ -338,7 +340,6 @@ def main(args):
 
     # W&B
     if args.wb:
-
         run = wandb.init(
             name=exp_name,
             project="text-detection",

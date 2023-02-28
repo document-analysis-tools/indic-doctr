@@ -7,11 +7,11 @@ import torch
 from torch.utils.data import DataLoader, RandomSampler
 
 from doctr import datasets
+from doctr.file_utils import CLASS_NAME
 from doctr.transforms import Resize
 
 
 def _validate_dataset(ds, input_size, batch_size=2, class_indices=False, is_polygons=False):
-
     # Fetch one sample
     img, target = ds[0]
     assert isinstance(img, torch.Tensor)
@@ -47,7 +47,6 @@ def _validate_dataset(ds, input_size, batch_size=2, class_indices=False, is_poly
 
 
 def _validate_dataset_recognition_part(ds, input_size, batch_size=2):
-
     # Fetch one sample
     img, label = ds[0]
     assert isinstance(img, torch.Tensor)
@@ -82,7 +81,6 @@ def test_visiondataset():
 
 
 def test_detection_dataset(mock_image_folder, mock_detection_label):
-
     input_size = (1024, 1024)
 
     ds = datasets.DetectionDataset(
@@ -92,11 +90,13 @@ def test_detection_dataset(mock_image_folder, mock_detection_label):
     )
 
     assert len(ds) == 5
-    img, target = ds[0]
+    img, target_dict = ds[0]
+    target = target_dict[CLASS_NAME]
     assert isinstance(img, torch.Tensor)
     assert img.dtype == torch.float32
     assert img.shape[-2:] == input_size
     # Bounding boxes
+    assert isinstance(target_dict, dict)
     assert isinstance(target, np.ndarray) and target.dtype == np.float32
     assert np.all(np.logical_and(target[:, :4] >= 0, target[:, :4] <= 1))
     assert target.shape[1] == 4
@@ -104,8 +104,9 @@ def test_detection_dataset(mock_image_folder, mock_detection_label):
     loader = DataLoader(ds, batch_size=2, collate_fn=ds.collate_fn)
     images, targets = next(iter(loader))
     assert isinstance(images, torch.Tensor) and images.shape == (2, 3, *input_size)
-    assert isinstance(targets, list) and all(isinstance(elt, np.ndarray) for elt in targets)
-
+    assert isinstance(targets, list) and all(
+        isinstance(elt, np.ndarray) for target in targets for elt in target.values()
+    )
     # Rotated DS
     rotated_ds = datasets.DetectionDataset(
         img_folder=mock_image_folder,
@@ -114,7 +115,7 @@ def test_detection_dataset(mock_image_folder, mock_detection_label):
         use_polygons=True,
     )
     _, r_target = rotated_ds[0]
-    assert r_target.shape[1:] == (4, 2)
+    assert r_target[CLASS_NAME].shape[1:] == (4, 2)
 
     # File existence check
     img_name, _ = ds.data[0]
@@ -156,7 +157,6 @@ def test_recognition_dataset(mock_image_folder, mock_recognition_label):
     [False, True],
 )
 def test_ocrdataset(mock_ocrdataset, use_polygons):
-
     input_size = (512, 512)
 
     ds = datasets.OCRDataset(
@@ -177,7 +177,6 @@ def test_ocrdataset(mock_ocrdataset, use_polygons):
 
 
 def test_charactergenerator():
-
     input_size = (32, 32)
     vocab = "abcdef"
 
@@ -203,7 +202,6 @@ def test_charactergenerator():
 
 
 def test_wordgenerator():
-
     input_size = (32, 128)
     wordlen_range = (1, 10)
     vocab = "abcdef"

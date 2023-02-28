@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -30,7 +30,7 @@ from doctr import transforms as T
 from doctr.datasets import DataLoader, DetectionDataset
 from doctr.models import detection
 from doctr.utils.metrics import LocalizationConfusion
-from utils import plot_recorder, plot_samples
+from utils import load_backbone, plot_recorder, plot_samples
 
 
 def record_lr(
@@ -58,7 +58,6 @@ def record_lr(
     loss_recorder = []
 
     for batch_idx, (images, targets) in enumerate(train_loader):
-
         images = batch_transforms(images)
 
         # Forward, Backward & update
@@ -91,7 +90,6 @@ def fit_one_epoch(model, train_loader, batch_transforms, optimizer, mb, amp=Fals
     train_iter = iter(train_loader)
     # Iterate over the batches of the dataset
     for images, targets in progress_bar(train_iter, parent=mb):
-
         images = batch_transforms(images)
 
         with tf.GradientTape() as tape:
@@ -115,11 +113,12 @@ def evaluate(model, val_loader, batch_transforms, val_metric):
         out = model(images, targets, training=False, return_preds=True)
         # Compute metric
         loc_preds = out["preds"]
-        for boxes_gt, boxes_pred in zip(targets, loc_preds):
-            if args.rotation and args.eval_straight:
-                # Convert pred to boxes [xmin, ymin, xmax, ymax]  N, 4, 2 --> N, 4
-                boxes_pred = np.concatenate((boxes_pred.min(axis=1), boxes_pred.max(axis=1)), axis=-1)
-            val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :4])
+        for target, loc_pred in zip(targets, loc_preds):
+            for boxes_gt, boxes_pred in zip(target.values(), loc_pred.values()):
+                if args.rotation and args.eval_straight:
+                    # Convert pred to boxes [xmin, ymin, xmax, ymax]  N, 4, 2 --> N, 4
+                    boxes_pred = np.concatenate((boxes_pred.min(axis=1), boxes_pred.max(axis=1)), axis=-1)
+                val_metric.update(gts=boxes_gt, preds=boxes_pred[:, :4])
 
         val_loss += out["loss"].numpy()
         batch_cnt += 1
@@ -130,7 +129,6 @@ def evaluate(model, val_loader, batch_transforms, val_metric):
 
 
 def main(args):
-
     print(args)
 
     if args.push_to_hub:
@@ -192,11 +190,17 @@ def main(args):
         pretrained=args.pretrained,
         input_shape=(args.input_size, args.input_size, 3),
         assume_straight_pages=not args.rotation,
+        class_names=val_set.class_names,
     )
 
     # Resume weights
     if isinstance(args.resume, str):
         model.load_weights(args.resume)
+
+    if isinstance(args.pretrained_backbone, str):
+        print("Loading backbone weights.")
+        model = load_backbone(model, args.pretrained_backbone)
+        print("Done.")
 
     # Metrics
     val_metric = LocalizationConfusion(
@@ -287,7 +291,6 @@ def main(args):
 
     # W&B
     if args.wb:
-
         run = wandb.init(
             name=exp_name,
             project="text-detection",
@@ -366,6 +369,7 @@ def parse_args():
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate for the optimizer (Adam)")
     parser.add_argument("-j", "--workers", type=int, default=None, help="number of workers used for dataloading")
     parser.add_argument("--resume", type=str, default=None, help="Path to your checkpoint")
+    parser.add_argument("--pretrained-backbone", type=str, default=None, help="Path to your backbone weights")
     parser.add_argument("--test-only", dest="test_only", action="store_true", help="Run the validation loop")
     parser.add_argument(
         "--freeze-backbone", dest="freeze_backbone", action="store_true", help="freeze model backbone for fine-tuning"
