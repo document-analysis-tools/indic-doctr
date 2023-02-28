@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -190,7 +190,6 @@ class CRNN(RecognitionModel, Model):
         top_paths: int = 1,
         **kwargs: Any,
     ) -> Dict[str, Any]:
-
         if kwargs.get("training", False) and target is None:
             raise ValueError("Need to provide labels during training")
 
@@ -228,7 +227,6 @@ def _crnn(
     input_shape: Optional[Tuple[int, int, int]] = None,
     **kwargs: Any,
 ) -> CRNN:
-
     pretrained_backbone = pretrained_backbone and not pretrained
 
     kwargs["vocab"] = kwargs.get("vocab", default_cfgs[arch]["vocab"])

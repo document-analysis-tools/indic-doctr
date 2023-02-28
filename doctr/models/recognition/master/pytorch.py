@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -227,7 +227,6 @@ class MASTER(_MASTER, nn.Module):
 
         # Final dimension include EOS/SOS/PAD
         for i in range(self.max_length - 1):
-
             source_mask, target_mask = self.make_source_and_target_mask(encoded, ys)
             output = self.decoder(ys, encoded, source_mask, target_mask)
             logits = self.linear(output)
@@ -272,7 +271,6 @@ def _master(
     ignore_keys: Optional[List[str]] = None,
     **kwargs: Any,
 ) -> MASTER:
-
     pretrained_backbone = pretrained_backbone and not pretrained
 
     # Patch the config

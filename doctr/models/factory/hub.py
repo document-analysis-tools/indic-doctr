@@ -1,4 +1,4 @@
-# Copyright (C) 2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -13,7 +13,13 @@ import textwrap
 from pathlib import Path
 from typing import Any
 
-from huggingface_hub import HfApi, HfFolder, Repository, hf_hub_download, snapshot_download
+from huggingface_hub import (  # type: ignore[attr-defined]
+    HfApi,
+    HfFolder,
+    Repository,
+    hf_hub_download,
+    snapshot_download,
+)
 
 from doctr import models
 from doctr.file_utils import is_tf_available, is_torch_available
@@ -166,10 +172,9 @@ def push_to_hf_hub(model: Any, model_name: str, task: str, **kwargs) -> None:
 
     local_cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "hub", model_name)
     repo_url = HfApi().create_repo(model_name, token=HfFolder.get_token(), exist_ok=False)
-    repo = Repository(local_dir=local_cache_dir, clone_from=repo_url, use_auth_token=True)
+    repo = Repository(local_dir=local_cache_dir, clone_from=repo_url, token=True)
 
     with repo.commit(commit_message):
-
         _save_model_and_config_for_hf_hub(model, repo.local_dir, arch=arch, task=task)
         readme_path = Path(repo.local_dir) / "README.md"
         readme_path.write_text(readme)

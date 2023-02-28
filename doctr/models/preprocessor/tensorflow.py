@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -37,7 +37,6 @@ class PreProcessor(NestedObject):
         fp16: bool = False,
         **kwargs: Any,
     ) -> None:
-
         self.batch_size = batch_size
         self.resize = Resize(output_size, **kwargs)
         # Perform the division by 255 at the same time

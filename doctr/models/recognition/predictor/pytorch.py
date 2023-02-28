@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -31,7 +31,6 @@ class RecognitionPredictor(nn.Module):
         model: nn.Module,
         split_wide_crops: bool = True,
     ) -> None:
-
         super().__init__()
         self.pre_processor = pre_processor
         self.model = model.eval()
@@ -46,7 +45,6 @@ class RecognitionPredictor(nn.Module):
         crops: Sequence[Union[np.ndarray, torch.Tensor]],
         **kwargs: Any,
     ) -> List[Tuple[str, float]]:
-
         if len(crops) == 0:
             return []
         # Dimension check

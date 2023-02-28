@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -24,7 +24,6 @@ default_cfgs: Dict[str, Dict[str, Any]] = {
 
 
 def _fasterrcnn(arch: str, pretrained: bool, **kwargs: Any) -> FasterRCNN:
-
     _kwargs = {
         "image_mean": default_cfgs[arch]["mean"],
         "image_std": default_cfgs[arch]["std"],

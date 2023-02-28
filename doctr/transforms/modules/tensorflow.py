@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -103,7 +103,6 @@ class Resize(NestedObject):
         img: tf.Tensor,
         target: Optional[np.ndarray] = None,
     ) -> Union[tf.Tensor, Tuple[tf.Tensor, np.ndarray]]:
-
         input_dtype = img.dtype
 
         img = tf.image.resize(img, self.wanted_size, self.method, self.preserve_aspect_ratio)

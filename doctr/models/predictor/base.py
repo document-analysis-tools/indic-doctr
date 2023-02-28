@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -55,7 +55,6 @@ class _OCRPredictor:
         channels_last: bool,
         assume_straight_pages: bool = False,
     ) -> List[List[np.ndarray]]:
-
         extraction_fn = extract_crops if assume_straight_pages else extract_rcrops
 
         crops = [
@@ -71,7 +70,6 @@ class _OCRPredictor:
         channels_last: bool,
         assume_straight_pages: bool = False,
     ) -> Tuple[List[List[np.ndarray]], List[np.ndarray]]:
-
         crops = _OCRPredictor._generate_crops(pages, loc_preds, channels_last, assume_straight_pages)
 
         # Avoid sending zero-sized crops
@@ -141,7 +139,6 @@ class _OCRPredictor:
         loc_preds: List[np.ndarray],
         word_preds: List[Tuple[str, float]],
     ) -> Tuple[List[np.ndarray], List[List[Tuple[str, float]]]]:
-
         text_preds = []
         if len(loc_preds) > 0:
             # Text

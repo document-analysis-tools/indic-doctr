@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -12,7 +12,6 @@ from ..core import RecognitionPostProcessor
 
 
 class _MASTER:
-
     vocab: str
     max_length: int
 
@@ -52,6 +51,5 @@ class _MASTERPostProcessor(RecognitionPostProcessor):
         self,
         vocab: str,
     ) -> None:
-
         super().__init__(vocab)
         self._embedding = list(vocab) + ["<eos>"] + ["<sos>"] + ["<pad>"]

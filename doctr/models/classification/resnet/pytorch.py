@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -108,7 +108,6 @@ class ResNet(nn.Sequential):
         num_classes: int = 1000,
         cfg: Optional[Dict[str, Any]] = None,
     ) -> None:
-
         _layers: List[nn.Module]
         if origin_stem:
             _layers = [
@@ -165,7 +164,6 @@ def _resnet(
     ignore_keys: Optional[List[str]] = None,
     **kwargs: Any,
 ) -> ResNet:
-
     kwargs["num_classes"] = kwargs.get("num_classes", len(default_cfgs[arch]["classes"]))
     kwargs["classes"] = kwargs.get("classes", default_cfgs[arch]["classes"])
 
@@ -193,7 +191,6 @@ def _tv_resnet(
     ignore_keys: Optional[List[str]] = None,
     **kwargs: Any,
 ) -> TVResNet:
-
     kwargs["num_classes"] = kwargs.get("num_classes", len(default_cfgs[arch]["classes"]))
     kwargs["classes"] = kwargs.get("classes", default_cfgs[arch]["classes"])
 

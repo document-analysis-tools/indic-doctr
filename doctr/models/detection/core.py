@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -23,7 +23,6 @@ class DetectionPostProcessor(NestedObject):
     """
 
     def __init__(self, box_thresh: float = 0.5, bin_thresh: float = 0.5, assume_straight_pages: bool = True) -> None:
-
         self.box_thresh = box_thresh
         self.bin_thresh = bin_thresh
         self.assume_straight_pages = assume_straight_pages

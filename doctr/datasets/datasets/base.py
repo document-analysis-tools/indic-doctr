@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -8,6 +8,9 @@ import shutil
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Tuple, Union
 
+import numpy as np
+
+from doctr.file_utils import copy_tensor
 from doctr.io.image import get_img_shape
 from doctr.utils.data import download_from_url
 
@@ -15,7 +18,6 @@ __all__ = ["_AbstractDataset", "_VisionDataset"]
 
 
 class _AbstractDataset:
-
     data: List[Any] = []
     _pre_transforms: Optional[Callable[[Any, Any], Tuple[Any, Any]]] = None
 
@@ -26,7 +28,6 @@ class _AbstractDataset:
         sample_transforms: Optional[Callable[[Any, Any], Tuple[Any, Any]]] = None,
         pre_transforms: Optional[Callable[[Any, Any], Tuple[Any, Any]]] = None,
     ) -> None:
-
         if not Path(root).is_dir():
             raise ValueError(f"expected a path to a reachable folder: {root}")
 
@@ -43,7 +44,6 @@ class _AbstractDataset:
         raise NotImplementedError
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
-
         # Read image
         img, target, name = self._read_sample(index)
         # Pre-transforms (format conversion at run-time etc.)
@@ -55,7 +55,13 @@ class _AbstractDataset:
             img = self.img_transforms(img)
 
         if self.sample_transforms is not None:
-            img, target = self.sample_transforms(img, target)
+            if isinstance(target, dict) and all([isinstance(item, np.ndarray) for item in target.values()]):
+                img_transformed = copy_tensor(img)
+                for class_name, bboxes in target.items():
+                    img_transformed, target[class_name] = self.sample_transforms(img, bboxes)
+                img = img_transformed
+            else:
+                img, target = self.sample_transforms(img, target)
 
         return img, target, name
 

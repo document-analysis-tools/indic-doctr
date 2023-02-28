@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022, Mindee.
+# Copyright (C) 2021-2023, Mindee.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -27,7 +27,6 @@ class DetectionPredictor(nn.Module):
         pre_processor: PreProcessor,
         model: nn.Module,
     ) -> None:
-
         super().__init__()
         self.pre_processor = pre_processor
         self.model = model.eval()
@@ -38,7 +37,6 @@ class DetectionPredictor(nn.Module):
         pages: List[Union[np.ndarray, torch.Tensor]],
         **kwargs: Any,
     ) -> List[np.ndarray]:
-
         # Dimension check
         if any(page.ndim != 3 for page in pages):
             raise ValueError("incorrect input shape: all pages are expected to be multi-channel 2D images.")
