@@ -24,6 +24,9 @@ from doctr.datasets import VOCABS
 from doctr.models import recognition
 from doctr.utils.metrics import TextMatch
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def get_wer(x,y):    
     return fastwer.score(x, y)
     
@@ -35,15 +38,15 @@ def get_test_results(predictions, language):
     df = pd.DataFrame(predictions)
     df[['pred','score']] =  pd.DataFrame(df.pred.tolist(), index= df.index)
     df = df.drop_duplicates()
-    df['id']= df['name'].str.split("_")
-    df[['temp','id']] =  pd.DataFrame(df.id.tolist(), index= df.index)
-    df['id'] = df['id'].apply(lambda x: str(x).rstrip('.jpg'))
-    df['id'] = df['id'].astype(int)
-    df['name'] = df['name'].str.replace('_','/')
-    df = df.sort_values('id')
+    # df['id']= df['name'].str.split("_")
+    # df[['temp','id']] =  pd.DataFrame(df.id.tolist(), index= df.index)
+    # df['id'] = df['id'].apply(lambda x: str(x).rstrip('.jpg'))
+    # df['id'] = df['id'].astype(int)
+    # df['name'] = df['name'].str.replace('_','/')
+    # df = df.sort_values('id')
     df = df[['name','pred']]
-    filename = './data/results/'+language+'_results.txt'
-    df.to_csv(filename, sep='\t', index=False)
+    filename = './results/'+language+'_result.txt'
+    df.to_csv(filename, sep=' ', index=False, header=False)
     
 def get_val_results(predictions, language):
     df = pd.DataFrame(predictions)

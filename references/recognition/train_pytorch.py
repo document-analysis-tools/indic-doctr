@@ -30,6 +30,9 @@ from doctr.models import login_to_hub, push_to_hf_hub, recognition
 from doctr.utils.metrics import TextMatch
 from utils import plot_recorder, plot_samples
 
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def record_lr(
     model: torch.nn.Module,
