@@ -108,6 +108,7 @@ class _WordGenerator(AbstractDataset):
         max_chars: int,
         num_samples: int,
         cache_samples: bool = False,
+        words_txt_path: Optional[str] = None,
         font_family: Optional[Union[str, List[str]]] = None,
         img_transforms: Optional[Callable[[Any], Any]] = None,
         sample_transforms: Optional[Callable[[Any, Any], Tuple[Any, Any]]] = None,
@@ -125,8 +126,10 @@ class _WordGenerator(AbstractDataset):
                     raise ValueError(f"unable to locate font: {font}")
         self.img_transforms = img_transforms
         self.sample_transforms = sample_transforms
-
+        self.words_txt_path = words_txt_path
+        
         self._data: List[Image.Image] = []
+            
         if cache_samples:
             _words = [self._generate_string(*self.wordlen_range) for _ in range(num_samples)]
             self._data = [
@@ -134,6 +137,11 @@ class _WordGenerator(AbstractDataset):
             ]
 
     def _generate_string(self, min_chars: int, max_chars: int) -> str:
+        
+        if self.words_txt_path:
+            words_list = open(self.words_txt_path, "r", encoding="utf-8").readlines()
+            return random.choice(words_list)
+            
         num_chars = random.randint(min_chars, max_chars)
         return "".join(random.choice(self.vocab) for _ in range(num_chars))
 

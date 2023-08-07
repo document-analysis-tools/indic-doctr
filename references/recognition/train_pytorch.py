@@ -112,7 +112,7 @@ def fit_one_epoch(model, train_loader, batch_transforms, optimizer, scheduler, m
 
     model.train()
     # Iterate over the batches of the dataset
-    for images, targets, names in progress_bar(train_loader, parent=mb):
+    for images, targets in progress_bar(train_loader, parent=mb):
 
         if torch.cuda.is_available():
             images = images.cuda()
@@ -247,6 +247,7 @@ def main(args):
             min_chars=args.min_chars,
             max_chars=args.max_chars,
             num_samples=args.val_samples * len(vocab),
+            words_txt_path=args.words_txt_path,
             font_family=fonts,
             img_transforms=Compose(
                 [
@@ -341,6 +342,7 @@ def main(args):
             min_chars=args.min_chars,
             max_chars=args.max_chars,
             num_samples=args.train_samples * len(vocab),
+            words_txt_path=args.words_txt_path,
             font_family=fonts,
             img_transforms=Compose(
                 [
@@ -489,6 +491,7 @@ def parse_args():
     parser.add_argument(
         "--show-samples", dest="show_samples", action="store_true", help="Display unormalized training samples"
     )
+    parser.add_argument("--words_txt_path", help="The text file contains the words to prepare dataset from.")
     parser.add_argument("--wb", dest="wb", action="store_true", help="Log to Weights & Biases")
     parser.add_argument("--push-to-hub", dest="push_to_hub", action="store_true", help="Push to Huggingface Hub")
     parser.add_argument(
